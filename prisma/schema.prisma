@@ -1,0 +1,164 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Company {
+  id          String    @id @default(uuid())
+  name        String
+  website     String?
+  founded     DateTime?
+  employees   Int?
+  description String?
+  logo        String?
+  logo_uuid   String?
+
+  industry           Industry           @relation(fields: [industry_id], references: [id])
+  industry_id        Int
+  company_tech_stack CompanyTechStack[]
+  company_perks      CompanyPerks[]
+  vacancies          Vacancy[]
+}
+
+model User {
+  id           String    @id @default(uuid())
+  name         String
+  surname      String
+  phone_number String?
+  birth_date   DateTime?
+  // 0 = Not known; * 1 = Male; * 2 = Female; * 9 = Not applicable
+  gender       Int       @default(0)
+  email        String    @unique
+  password     String
+  created_at   DateTime  @default(now())
+  updated_at   DateTime  @updatedAt
+
+  // advanced
+  role     String?
+  about_me String?
+
+  experiences        Experience[]
+  notifications      Notification[]
+  portfolios         Portfolio[]
+  user_languages     UserLanguages[]
+  user_social_medias UserSocialMedias[]
+}
+
+model Notification {
+  id      Int     @id @default(autoincrement())
+  user    User?   @relation(fields: [user_id], references: [id])
+  user_id String?
+}
+
+model Experience {
+  id      String  @id @default(uuid())
+  user    User?   @relation(fields: [user_id], references: [id])
+  user_id String?
+}
+
+model Portfolio {
+  id      Int     @id @default(autoincrement())
+  user    User?   @relation(fields: [user_id], references: [id])
+  user_id String?
+}
+
+model Languages {
+  id             Int             @id @default(autoincrement())
+  language       String
+  user_languages UserLanguages[]
+}
+
+model UserLanguages {
+  id          Int       @id @default(autoincrement())
+  user        User?     @relation(fields: [user_id], references: [id])
+  user_id     String?
+  languages   Languages @relation(fields: [language_id], references: [id])
+  language_id Int
+}
+
+model SocialMedias {
+  id                 Int                @id @default(autoincrement())
+  url                String
+  social_media       String
+  user_social_medias UserSocialMedias[]
+}
+
+model UserSocialMedias {
+  id              Int          @id @default(autoincrement())
+  title           String
+  user            User         @relation(fields: [user_id], references: [id])
+  user_id         String
+  social_medias   SocialMedias @relation(fields: [social_media_id], references: [id])
+  social_media_id Int
+}
+
+model Industry {
+  id            Int       @id @default(autoincrement())
+  industry_name String
+  companies     Company[]
+}
+
+model TechStack {
+  id                 Int                @id @default(autoincrement())
+  stack_name         String
+  logo_path          String
+  company_tech_stack CompanyTechStack[]
+}
+
+model CompanyTechStack {
+  id            Int       @id @default(autoincrement())
+  Company       Company   @relation(fields: [companyId], references: [id])
+  companyId     String
+  tech_stack    TechStack @relation(fields: [tech_stack_id], references: [id])
+  tech_stack_id Int
+}
+
+model Perks {
+  id            Int            @id @default(autoincrement())
+  perk_name     String
+  description   String
+  icon_path     String
+  company_perks CompanyPerks[]
+}
+
+model CompanyPerks {
+  id         Int     @id @default(autoincrement())
+  company    Company @relation(fields: [company_id], references: [id])
+  company_id String
+  perks      Perks   @relation(fields: [perks_id], references: [id])
+  perks_id   Int
+}
+
+//!IMPLEMENT VACANCY CONTENT
+model Vacancy {
+  id              Int      @id @default(autoincrement())
+  description     String
+  max_apply_count Int
+  deadline        DateTime
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+  // full-time / part-time / internship / remote / freelance / contract / temporary
+  job_type        String
+  min_salary      Int?
+  max_salary      Int?
+  company         Company? @relation(fields: [company_id], references: [id])
+  company_id      String?
+  category        Category @relation(fields: [category_id], references: [id])
+  category_id     Int
+}
+
+model Category {
+  id            Int       @id @default(autoincrement())
+  category_name String
+  vacancies     Vacancy[]
+}
