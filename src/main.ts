@@ -7,6 +7,8 @@ async function bootstrap() {
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
+      forbidNonWhitelisted: true,
+      stopAtFirstError: true,
       exceptionFactory(errors) {
         const messages = errors.map((error) => {
           return {
@@ -17,7 +19,6 @@ async function bootstrap() {
       },
     }),
   );
-  // enpoint/api
   app.setGlobalPrefix('api');
   await app.listen(3000);
 }

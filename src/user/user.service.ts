@@ -27,4 +27,10 @@ export class UserService {
       data: signupDto,
     });
   }
+
+  async deleteAll() {
+    return this.prismaService.user.deleteMany({});
+  }
+
+  async changePhoto() {}
 }
